@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-Frame Сцена</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-physics-system@3.5.0/dist/aframe-physics-system.min.js"></script>
+    <style>
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 36px; /* Увеличенный размер шрифта для счета */
+        }
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 36px; /* Увеличенный размер шрифта для сообщения о завершении игры */
+            display: none; /* Скрыть сообщение о завершении игры по умолчанию */
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Счет: 0</div>
+    <div id="game-over">
+        Игра окончена! Ваш счет: <span id="final-score"></span><br>
+        <button onclick="restartGame()">Перезапустить игру</button>
+    </div>
+
+    <a-scene physics="debug: true">
+        <!-- Добавление неба -->
+        <a-sky color="#B0E0E6"></a-sky> <!-- Светло-голубое небо -->
+        
+        <!-- Добавление пола -->
+        <a-plane rotation="-90 0 0" width="30" height="30" color="#98FB98" static-body></a-plane> <!-- Светло-зеленый пол -->
+
+        <!-- Камера и контроллеры -->
+        <a-entity camera look-controls position="0 1.6 0" class="player" wasd-controls></a-entity>
+
+        <!-- Яркие объекты для сбора с увеличенной высотой и большим расстоянием между ними -->
+        <a-sphere position="-5 1 -4" radius="0.5" color="#FF4500" class="collectible" dynamic-body></a-sphere> <!-- Ярко-красная сфера -->
+        <a-box position="-2 1 -6" depth="1" height="1" width="1" color="#00BFFF" class="collectible" dynamic-body></a-box> <!-- Ярко-голубой куб -->
+        <a-cylinder position="1 1 -8" radius="0.5" height="1.5" color="#FFD700" class="collectible" dynamic-body></a-cylinder> <!-- Золотистый цилиндр -->
+        <a-cone position="4 1 -4" radiusBottom="0.5" height="1.5" color="#FF69B4" class="collectible" dynamic-body></a-cone> <!-- Ярко-розовый конус -->
+        <a-torus position="-3 1 -10" radius="0.5" radiusTubular="0.2" color="#32CD32" class="collectible" dynamic-body></a-torus> <!-- Ярко-зеленый торус -->
+        <a-sphere position="-1 1 -12" radius="0.3" color="#FF1493" class="collectible" dynamic-body></a-sphere> <!-- Ярко-розовая сфера -->
+        <a-box position="3 1 -12" depth="1" height="1" width="1" color="#8A2BE2" class="collectible" dynamic-body></a-box> <!-- Ярко-пурпурный куб -->
+
+        <!-- Текст для отображения счета -->
+        <a-text id="score-text" value="Счет: 0" position="-4 2 -4"></a-text>
+
+        <!-- Таймер -->
+        <a-text id="timer-text" value="" position="-4 2 -5"></a-text>
+    </a-scene>
+
+    <script>
+        let score = 0;
+        let timer = 30; // Время в секундах
+        let gameInterval;
+
+        // Функция для обновления счета на экране
+        function updateScoreDisplay() {
+            document.getElementById('score-text').setAttribute('value', 'Счет: ' + score);
+        }
+
+        // Функция для обновления таймера
+        function updateTimer() {
+            if (timer > 0) {
+                timer--;
+                document.getElementById('timer-text').setAttribute('value', 'Осталось времени: ' + timer);
+            } else {
+                endGame();
+            }
+        }
+
+        // Обработка столкновений
+        document.querySelectorAll('.collectible').forEach(obj => {
+            obj.addEventListener('collide', function (event) {
+                if (event.detail.body.el.classList.contains('player')) {
+                    this.setAttribute('visible', false); // Скрыть объект
+                    score++; // Увеличить счет
+                    updateScoreDisplay(); // Обновить отображение счета
+                }
+            });
+        });
+
+        // Функция завершения игры
+        function endGame() {
+            clearInterval(gameInterval);
+            document.getElementById('final-score').innerText = score; // Отображаем финальный счет
+            document.getElementById('game-over').style.display = 'block'; // Показываем сообщение о завершении игры
+            
+            // Убираем все collectible объекты
+            const collectibles = document.querySelectorAll('.collectible');
+            collectibles.forEach(obj => obj.setAttribute('visible', false));
+        }
+
+        // Функция перезапуска игры
+        function restartGame() {
+            score = 0;
+            timer = 30; // Сброс таймера
+            document.getElementById('score-text').setAttribute('value', 'Счет: ' + score);
+            document.getElementById('timer-text').setAttribute('value', 'Осталось времени: ' + timer);
+            document.getElementById('game-over').style.display = 'none'; // Скрываем сообщение о завершении игры
+            
+            const collectibles = document.querySelectorAll('.collectible');
+            collectibles.forEach(obj => {
+                obj.setAttribute('visible', true); // Возвращаем объекты на сцену
+                obj.setAttribute('position', obj.getAttribute('position')); // Обновляем позицию, чтобы они были видимы
+            });
+            
+            gameInterval = setInterval(updateTimer, 1000); // Запуск таймера
+            updateTimer(); // Начинаем таймер сразу
+        }
+
+        // Инициализация отображения счета и таймера
+        updateScoreDisplay();
+        document.getElementById('timer-text').setAttribute('value', 'Осталось времени: ' + timer);
+
+        // Запуск таймера при загрузке страницы
+        gameInterval = setInterval(updateTimer, 1000);
+    </script>
+</body>
+</html>

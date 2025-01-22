@@ -57,7 +57,7 @@
 
     <script>
         let score = 0;
-        let timer = 30; // Time in seconds
+        let timer = 60; // Time in seconds
         let gameInterval;
 
         // Function to update the score on screen
@@ -100,7 +100,7 @@
         // Restart game function
         function restartGame() {
             score = 0;
-            timer = 30; // Reset timer
+            timer = 60; // Reset timer
             document.getElementById('score-text').setAttribute('value', 'Score: ' + score);
             document.getElementById('timer-text').setAttribute('value', 'Time Left: ' + timer);
             document.getElementById('game-over').style.display = 'none'; // Hide game over message

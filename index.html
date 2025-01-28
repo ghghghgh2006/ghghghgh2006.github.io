@@ -39,8 +39,10 @@
         <!-- Adding ground -->
         <a-plane rotation="-90 0 0" width="30" height="30" color="#98FB98" static-body></a-plane> <!-- Light green ground -->
 
-        <!-- Camera and controls -->
-        <a-entity camera look-controls position="0 1.6 0" class="player" wasd-controls></a-entity>
+        <!-- Camera and controls with raycaster -->
+        <a-entity camera look-controls position="0 1.6 0" class="player" wasd-controls>
+            <a-entity raycaster="objects: .collectible; showLine: true;" position="0 0 -1"></a-entity> <!-- Raycaster for interaction -->
+        </a-entity>
 
         <!-- Collectible objects -->
         <a-sphere position="-5 1 -4" radius="0.5" color="#FF4500" class="collectible" dynamic-body></a-sphere> <!-- Bright red sphere -->
@@ -72,15 +74,14 @@
             }
         }
 
-        // Collision handling
-        document.querySelectorAll('.collectible').forEach(obj => {
-            obj.addEventListener('collide', function (event) {
-                if (event.detail.body.el.classList.contains('player')) {
-                    this.setAttribute('visible', false); // Hide object
-                    score++; // Increase score
-                    updateScoreDisplay(); // Update score display
-                }
-            });
+        // Collision handling using raycaster
+        document.querySelector('.player').addEventListener('raycaster-intersected', function (event) {
+            const target = event.detail.intersectedEl;
+            if (target.classList.contains('collectible')) {
+                target.setAttribute('visible', false); // Hide object
+                score++; // Increase score
+                updateScoreDisplay(); // Update score display
+            }
         });
 
         // Game over function

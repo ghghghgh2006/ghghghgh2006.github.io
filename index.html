@@ -34,13 +34,13 @@
 
     <a-scene physics="debug: true">
         <!-- Adding sky -->
-        <a-sky color="#332f2c"></a-sky> <!-- Dark sky -->
+        <a-sky color="#332f2c"></a-sky> <!-- Light blue sky -->
         
         <!-- Adding ground -->
         <a-plane rotation="-90 0 0" width="30" height="30" color="#98FB98" static-body></a-plane> <!-- Light green ground -->
 
         <!-- Camera and controls with raycaster -->
-        <a-entity camera look-controls position="0 1.6 0" class="player wasd-controls">
+        <a-entity camera look-controls position="0 1.6 0" class="player" wasd-controls>
             <a-entity raycaster="objects: .collectible; showLine: true;" position="0 0 -1"></a-entity> <!-- Raycaster for interaction -->
         </a-entity>
 
@@ -51,104 +51,10 @@
         
         <!-- Text for displaying score and timer -->
         <a-text id="score-text" value="Score: 0" position="-4 2 -4"></a-text>
-        <a-text id="timer-text" value="Time Left: 60" position="-4 2 -5"></a-text> <!-- Initialize timer text -->
+        <a-text id="timer-text" value="" position="-4 2 -5"></a-text>
     </a-scene>
 
     <script>
-        AFRAME.registerComponent('wasd-controls', {
-            schema: {
-                acceleration: {default: 65},
-                adAxis: {default: 'x', oneOf: ['x', 'y', 'z']},
-                adEnabled: {default: true},
-                adInverted: {default: false},
-                enabled: {default: true},
-                fly: {default: false},
-                wsAxis: {default: 'z', oneOf: ['x', 'y', 'z']},
-                wsEnabled: {default: true},
-                wsInverted: {default: false}
-            },
-            after: ['look-controls'],
-
-            init: function () {
-                this.direction = new THREE.Vector3();
-                this.velocity = new THREE.Vector3();
-                
-                // Bind event handlers
-                this.onKeyDown = this.onKeyDown.bind(this);
-                this.onKeyUp = this.onKeyUp.bind(this);
-                
-                // Add event listeners
-                window.addEventListener('keydown', this.onKeyDown);
-                window.addEventListener('keyup', this.onKeyUp);
-            },
-
-            remove: function () {
-                // Remove event listeners
-                window.removeEventListener('keydown', this.onKeyDown);
-                window.removeEventListener('keyup', this.onKeyUp);
-            },
-
-            onKeyDown: function (event) {
-                switch (event.code) {
-                    case 'KeyW':
-                        this.direction.z = -1; // Move forward
-                        break;
-                    case 'KeyS':
-                        this.direction.z = 1; // Move backward
-                        break;
-                    case 'KeyA':
-                        this.direction.x = -1; // Move left
-                        break;
-                    case 'KeyD':
-                        this.direction.x = 1; // Move right
-                        break;
-                }
-            },
-
-            onKeyUp: function (event) {
-                switch (event.code) {
-                    case 'KeyW':
-                    case 'KeyS':
-                        this.direction.z = 0;
-                        break;
-                    case 'KeyA':
-                    case 'KeyD':
-                        this.direction.x = 0;
-                        break;
-                }
-            },
-
-            tick: function (time, timeDelta) {
-                if (!this.data.enabled) return;
-
-                const acceleration = this.data.acceleration * (timeDelta / 1000); // Convert to seconds
-
-                // Update velocity based on direction and acceleration
-                if (this.data.wsEnabled) {
-                    if (this.data.wsInverted) {
-                        this.velocity.z -= this.direction.z * acceleration;
-                    } else {
-                        this.velocity.z += this.direction.z * acceleration;
-                    }
-                }
-
-                if (this.data.adEnabled) {
-                    if (this.data.adInverted) {
-                        this.velocity.x -= this.direction.x * acceleration;
-                    } else {
-                        this.velocity.x += this.direction.x * acceleration;
-                    }
-                }
-
-                // Apply velocity to the entity's position
-                const el = this.el;
-                el.object3D.position.add(this.velocity.clone().multiplyScalar(timeDelta / 1000));
-                
-                // Reset velocity for the next frame
-                this.velocity.set(0, 0, 0);
-            }
-        });
-
         let score = 0;
         let timer = 60; // Start timer at 60 seconds
         let gameInterval;
@@ -194,10 +100,7 @@
             score = 0;
             timer = 60; // Reset timer to 60 seconds
             updateScoreDisplay();
-            
-            // Reset timer display
             document.getElementById('timer-text').setAttribute('value', 'Time Left: ' + timer);
-            
             document.getElementById('game-over').style.display = 'none'; // Hide game over message
             
             const collectibles = document.querySelectorAll('.collectible');
@@ -206,13 +109,14 @@
                 obj.setAttribute('position', obj.getAttribute('position')); // Ensure they are visible
             });
             
-            gameInterval = setInterval(updateTimer, 1000); // Start timer interval again
-            updateTimer(); // Start timer immediately to show correct value on restart
+            gameInterval = setInterval(updateTimer, 1000); // Start timer
+            updateTimer(); // Start timer immediately
         }
 
         // Initialize score and timer display
         updateScoreDisplay();
-        
+        document.getElementById('timer-text').setAttribute('value', 'Time Left: ' + timer);
+
         // Start timer on page load
         gameInterval = setInterval(updateTimer, 1000);
     </script>

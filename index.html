@@ -34,13 +34,13 @@
 
     <a-scene physics="debug: true">
         <!-- Adding sky -->
-        <a-sky color="#332f2c"></a-sky> <!-- Light blue sky -->
+        <a-sky color="#332f2c"></a-sky> <!-- Dark sky -->
         
         <!-- Adding ground -->
         <a-plane rotation="-90 0 0" width="30" height="30" color="#98FB98" static-body></a-plane> <!-- Light green ground -->
 
         <!-- Camera and controls with raycaster -->
-        <a-entity camera look-controls position="0 1.6 0" class="player" wasd-controls>
+        <a-entity camera look-controls position="0 1.6 0" class="player wasd-controls">
             <a-entity raycaster="objects: .collectible; showLine: true;" position="0 0 -1"></a-entity> <!-- Raycaster for interaction -->
         </a-entity>
 
@@ -51,7 +51,7 @@
         
         <!-- Text for displaying score and timer -->
         <a-text id="score-text" value="Score: 0" position="-4 2 -4"></a-text>
-        <a-text id="timer-text" value="" position="-4 2 -5"></a-text>
+        <a-text id="timer-text" value="Time Left: 60" position="-4 2 -5"></a-text> <!-- Initialize timer text -->
     </a-scene>
 
     <script>
@@ -100,7 +100,10 @@
             score = 0;
             timer = 60; // Reset timer to 60 seconds
             updateScoreDisplay();
+            
+            // Reset timer display
             document.getElementById('timer-text').setAttribute('value', 'Time Left: ' + timer);
+            
             document.getElementById('game-over').style.display = 'none'; // Hide game over message
             
             const collectibles = document.querySelectorAll('.collectible');
@@ -109,16 +112,16 @@
                 obj.setAttribute('position', obj.getAttribute('position')); // Ensure they are visible
             });
             
-            gameInterval = setInterval(updateTimer, 1000); // Start timer
-            updateTimer(); // Start timer immediately
+            gameInterval = setInterval(updateTimer, 1000); // Start timer interval again
+            updateTimer(); // Start timer immediately to show correct value on restart
         }
 
         // Initialize score and timer display
         updateScoreDisplay();
-        document.getElementById('timer-text').setAttribute('value', 'Time Left: ' + timer);
-
+        
         // Start timer on page load
         gameInterval = setInterval(updateTimer, 1000);
     </script>
 </body>
 </html>
+

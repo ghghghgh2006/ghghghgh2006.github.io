@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-Frame VR Movement</title>
+    <title>A-Frame Game Scene</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-physics-system@3.5.0/dist/aframe-physics-system.min.js"></script>
     <style>
@@ -39,10 +39,9 @@
         <!-- Adding ground -->
         <a-plane rotation="-90 0 0" width="30" height="30" color="#98FB98" static-body></a-plane> <!-- Light green ground -->
 
-        <!-- Camera and controls -->
-        <a-entity camera look-controls position="0 1.6 0" class="player">
-            <a-entity id="left-controller" oculus-touch-controls="hand: left" position="-0.5 0 -1"></a-entity>
-            <a-entity id="right-controller" oculus-touch-controls="hand: right" position="0.5 0 -1"></a-entity>
+        <!-- Camera and controls with raycaster -->
+        <a-entity camera look-controls position="0 1.6 0" class="player wasd-controls">
+            <a-entity raycaster="objects: .collectible; showLine: true;" position="0 0 -1"></a-entity> <!-- Raycaster for interaction -->
         </a-entity>
 
         <!-- Collectible objects -->
@@ -85,6 +84,25 @@
             }
         });
 
+        // Handle mouse enter and click events for collectibles
+        const collectibles = document.querySelectorAll('.collectible');
+        
+        collectibles.forEach(collectible => {
+            collectible.addEventListener('mouseenter', function () {
+                this.setAttribute('color', '#FF0000'); // Change color on hover
+            });
+
+            collectible.addEventListener('mouseleave', function () {
+                this.setAttribute('color', this.getAttribute('color')); // Reset color on leave
+            });
+
+            collectible.addEventListener('click', function () {
+                this.setAttribute('visible', false); // Hide object on click
+                score++; // Increase score
+                updateScoreDisplay(); // Update score display
+            });
+        });
+
         // Game over function
         function endGame() {
             clearInterval(gameInterval);
@@ -92,7 +110,6 @@
             document.getElementById('game-over').style.display = 'block'; // Show game over message
             
             // Hide all collectible objects
-            const collectibles = document.querySelectorAll('.collectible');
             collectibles.forEach(obj => obj.setAttribute('visible', false));
         }
 
@@ -107,10 +124,10 @@
             
             document.getElementById('game-over').style.display = 'none'; // Hide game over message
             
-            const collectibles = document.querySelectorAll('.collectible');
             collectibles.forEach(obj => {
                 obj.setAttribute('visible', true); // Return objects to the scene
                 obj.setAttribute('position', obj.getAttribute('position')); // Ensure they are visible
+                obj.setAttribute('color', obj.getAttribute('color')); // Reset color if changed
             });
             
             gameInterval = setInterval(updateTimer, 1000); // Start timer interval again
@@ -122,26 +139,8 @@
         
         // Start timer on page load
         gameInterval = setInterval(updateTimer, 1000);
-        
-         // Movement with controllers
-         const playerEntity = document.querySelector('.player');
-         const leftController = document.querySelector('#left-controller');
-         const rightController = document.querySelector('#right-controller');
-
-         leftController.addEventListener('axismove', function (event) {
-             if (event.detail.axis[1] > 0.2) { // Move forward with left controller joystick up
-                 playerEntity.object3D.position.z -= Math.cos(playerEntity.object3D.rotation.y) * event.detail.axis[1];
-                 playerEntity.object3D.position.x -= Math.sin(playerEntity.object3D.rotation.y) * event.detail.axis[1];
-             }
-         });
-
-         rightController.addEventListener('axismove', function (event) {
-             if (event.detail.axis[1] > 0.2) { // Move backward with right controller joystick down
-                 playerEntity.object3D.position.z += Math.cos(playerEntity.object3D.rotation.y) * event.detail.axis[1];
-                 playerEntity.object3D.position.x += Math.sin(playerEntity.object3D.rotation.y) * event.detail.axis[1];
-             }
-         });
     </script>
 </body>
 </html>
+
 
